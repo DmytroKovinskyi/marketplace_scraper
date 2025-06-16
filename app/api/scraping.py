@@ -6,7 +6,7 @@ from app.services.scraped_data import (
     create_scraped_data, get_scraped_data, get_scraped_data_list, update_scraped_data, delete_scraped_data
 )
 from app.dependencies import get_db
-from app.services.scraper import scrape_rozetka_smartphones, save_rozetka_scraped_data
+from app.services.scraper import scrape_rozetka_smartphones, save_rozetka_scraped_data, scrape_citrus_smartphones, save_citrus_scraped_data, scrape_amazon_smartphones, save_amazon_scraped_data
 
 router = APIRouter(prefix="/scraped-data", tags=["scraped-data"])
 
@@ -49,4 +49,26 @@ def scrape_rozetka(query: str, limit: int = 10):
 def scrape_and_save_rozetka(product_id: int, platform_id: int, query: str, limit: int = 10, db: Session = Depends(get_db)):
     scraped = scrape_rozetka_smartphones(query, limit)
     saved = save_rozetka_scraped_data(db, product_id, platform_id, scraped)
+    return {"saved_count": len(saved)}
+
+@router.post("/citrus/search")
+def scrape_citrus(query: str, limit: int = 10):
+    results = scrape_citrus_smartphones(query, limit)
+    return {"results": results}
+
+@router.post("/citrus/scrape-and-save")
+def scrape_and_save_citrus(product_id: int, platform_id: int, query: str, limit: int = 10, db: Session = Depends(get_db)):
+    scraped = scrape_citrus_smartphones(query, limit)
+    saved = save_citrus_scraped_data(db, product_id, platform_id, scraped)
+    return {"saved_count": len(saved)}
+
+@router.post("/amazon/search")
+def scrape_amazon(query: str, limit: int = 10):
+    results = scrape_amazon_smartphones(query, limit)
+    return {"results": results}
+
+@router.post("/amazon/scrape-and-save")
+def scrape_and_save_amazon(product_id: int, platform_id: int, query: str, limit: int = 10, db: Session = Depends(get_db)):
+    scraped = scrape_amazon_smartphones(query, limit)
+    saved = save_amazon_scraped_data(db, product_id, platform_id, scraped)
     return {"saved_count": len(saved)}
