@@ -6,6 +6,7 @@ from app.services.scraped_data import (
     create_scraped_data, get_scraped_data, get_scraped_data_list, update_scraped_data, delete_scraped_data
 )
 from app.dependencies import get_db
+from app.services.scraper import scrape_rozetka_smartphones
 
 router = APIRouter(prefix="/scraped-data", tags=["scraped-data"])
 
@@ -37,3 +38,9 @@ def delete(data_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Scraped data not found")
     return {"ok": True}
+
+@router.post("/rozetka/search")
+def scrape_rozetka(query: str, limit: int = 10):
+    """Скрейпінг смартфонів на Rozetka за запитом (query)."""
+    results = scrape_rozetka_smartphones(query, limit)
+    return {"results": results}
