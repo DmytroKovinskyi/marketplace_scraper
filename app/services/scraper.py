@@ -1,6 +1,8 @@
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import time
+from app.db import models
+from datetime import datetime
 
 def scrape_rozetka_smartphones(query: str, limit: int = 10):
     results = []
@@ -34,3 +36,24 @@ def scrape_rozetka_smartphones(query: str, limit: int = 10):
             })
         browser.close()
     return results
+
+def save_rozetka_scraped_data(db, product_id: int, platform_id: int, scraped_list: list):
+    saved = []
+    for item in scraped_list:
+        db_data = models.ScrapedProductData(
+            product_id=product_id,
+            platform_id=platform_id,
+            url_on_platform=item.get("url_on_platform"),
+            name_on_platform=item.get("name_on_platform"),
+            price=item.get("price"),
+            currency=item.get("currency"),
+            rating=item.get("rating"),
+            reviews_count=item.get("reviews_count"),
+            availability_status=item.get("availability_status"),
+            scraped_at=datetime.utcnow(),
+            search_position=item.get("search_position"),
+        )
+        db.add(db_data)
+        saved.append(db_data)
+    db.commit()
+    return saved
